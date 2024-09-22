@@ -5,7 +5,7 @@ FROM public.ecr.aws/lambda/python:3.9 AS builder
 COPY requirements.txt .
 
 # Install the specified packages
-RUN pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
+RUN pip install --no-cache-dir -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
 # Runtime stage
 FROM public.ecr.aws/lambda/python:3.9

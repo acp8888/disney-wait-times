@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 import boto3
-from datetime import datetime
+from datetime import datetime, timezone
 import pyarrow as pa
 import pyarrow.parquet as pq
 import io
@@ -38,7 +38,6 @@ def fetch_all_park_data():
                 all_ride_data.append(process_ride_data(park_name, ride))
     return all_ride_data
 
-
 def save_to_s3(data, bucket_name):
     # Convert data to pandas DataFrame
     df = pd.DataFrame(data)
@@ -64,9 +63,17 @@ def save_to_s3(data, bucket_name):
 
     print(f"Data saved to S3: s3://{bucket_name}/{filename}")
 
-def main():
-    all_ride_data = fetch_all_park_data()
-    save_to_s3(all_ride_data, "disney-park-wait-times")
-
-if __name__ == "__main__":
-    main()
+def lambda_handler(event, context):
+    try:
+        all_ride_data = fetch_all_park_data()
+        save_to_s3(all_ride_data, "disney-park-wait-times")
+        return {
+            'statusCode': 200,
+            'body': 'Data successfully collected and saved to S3'
+        }
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return {
+            'statusCode': 500,
+            'body': f'Error occurred: {str(e)}'
+        }
